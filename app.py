@@ -1,12 +1,24 @@
-from flask import Flask,render_template,request,flash
-from flask_login import login_manager
+from flask import Flask,render_template,request,flash,redirect,url_for
+from flask_login import LoginManager,login_user,login_required
 from models import db, User, Task
 
 app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///todo.db"
 app.config["SECRET_KEY"] = "your-secret-key"
+login_manager = LoginManager()
+login_manager.init_app(app)
 db.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+@app.route("/")
+def home():
+    return redirect(url_for("login"))
 
 
 @app.route("/login", methods = ["GET","POST"])
@@ -18,7 +30,8 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and user.password==password:
-            return render_template ("dashboard.html")
+            login_user(user)
+            return redirect(url_for("dashboard"))
         else:
             flash("Invalid username or password")
     return render_template("login.html")
@@ -38,6 +51,12 @@ def register():
         db.session.add(new_user)
         db.session.commit()
     return render_template("register.html")
+
+
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    return render_template("dashboard.html")
     
 
 
