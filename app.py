@@ -1,5 +1,5 @@
 from flask import Flask,render_template,request,flash,redirect,url_for
-from flask_login import LoginManager,login_user,login_required
+from flask_login import LoginManager,login_user, login_required, current_user
 from models import db, User, Task
 
 app = Flask(__name__)
@@ -57,6 +57,17 @@ def register():
 @login_required
 def dashboard():
     return render_template("dashboard.html")
+
+
+@app.route ("/tasks", methods=["GET","POST"])
+@login_required
+def task():
+    if request.method == "POST":
+        task_text = request.form["task"]
+        new_task = Task(task=task_text,user_id=current_user.id)
+        db.session.add(new_task)
+        db.session.commit()
+    return render_template("task.html")
     
 
 
