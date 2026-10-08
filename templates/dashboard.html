@@ -1,13 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Dashboard</title>
 </head>
+
 <body>
-    <h1>Welcome {{current_user.username}}</h1>
-    this is user dashboard
-    <a href="{{url_for('task')}}">my tasks</a>
+
+    <h1>Welcome {{ current_user.username }}</h1>
+
+    <p>This is user dashboard</p>
+
+    <a href="{{ url_for('task') }}">My Tasks</a>
+
+    <br><br>
+
+    <a href="{{ url_for('dashboard', filter='all') }}">All</a>
+    <a href="{{ url_for('dashboard', filter='pending') }}">Pending</a>
+    <a href="{{ url_for('dashboard', filter='completed') }}">Completed</a>
+
+    <h2>{% if filter_value=="pending" %}
+         pending task
+        {% elif filter_value=="completed" %}
+         completed task
+        {% else %}
+         all task
+        {% endif %}
+    </h2>
+
+    {% for task in tasks %}
+        <p>{{ task.task }}</p>
+    {% endfor %}
+
 </body>
 </html>
+{% endblock %}
