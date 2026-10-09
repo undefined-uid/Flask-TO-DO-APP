@@ -53,11 +53,18 @@ def register():
     return render_template("register.html")
 
 
-@app.route("/dashboard")
+@app.route("/dashboard", methods=["GET","POST"])
 @login_required
 def dashboard():
     filter_value = request.args.get("filter", "pending")
 
+    if request.method == "POST":
+        task_text=request.form["task"]
+        new_task= Task(task=task_text,user_id=current_user.id)
+        db.session.add(new_task)
+        db.session.commit()    
+    
+    
     if filter_value == "pending":
         tasks = Task.query.filter_by(
             status=False,
@@ -74,6 +81,8 @@ def dashboard():
         tasks = Task.query.filter_by(
             user_id=current_user.id
         ).all()
+
+    
 
     return render_template("dashboard.html", tasks=tasks ,filter_value=filter_value)
 
