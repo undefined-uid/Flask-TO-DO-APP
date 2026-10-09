@@ -1,43 +1,96 @@
 {% extends "base.html" %}
+
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-</head>
 
-<body>
+<h1>This is user dashboard</h1>
 
-    <h1>This is user dashboard</h1><br>
+<form action="{{ url_for('dashboard') }}" method="POST">
+    <label for="task">Add task</label>
+    <input
+        type="text"
+        name="task"
+        id="task"
+        placeholder="Add task here"
+        required
+    >
+    <button type="submit">Submit</button>
+</form>
 
-    <form action="{{url_for('dashboard')}}" method="POST">
-        <lable for="task">Add task</lable>
-        <input name="task" id="task" placeholder="add task here">
-        <button type="submit">submit</button>
-    </form>
+<br>
 
-
-    <br><br>
-
+<nav>
     <a href="{{ url_for('dashboard', filter='all') }}">All</a>
     <a href="{{ url_for('dashboard', filter='pending') }}">Pending</a>
     <a href="{{ url_for('dashboard', filter='completed') }}">Completed</a>
+</nav>
 
-    <h2>{% if filter_value=="pending" %}
-         pending task
-        {% elif filter_value=="completed" %}
-         completed task
-        {% else %}
-         all task
+<h2>
+    {% if filter_value == "pending" %}
+        Pending Tasks
+    {% elif filter_value == "completed" %}
+        Completed Tasks
+    {% else %}
+        All Tasks
+    {% endif %}
+</h2>
+
+{% for task in tasks %}
+    <div class="task-item">
+
+        <span>
+            {{ task.task }}
+            {% if task.status %}
+                (Completed)
+            {% else %}
+                (Pending)
+            {% endif %}
+        </span>
+
+        {% if not task.status %}
+            <form
+                method="POST"
+                action="{{ url_for('complete_task', task_id=task.task_id) }}"
+                style="display: inline;"
+            >
+                <button type="submit">Complete</button>
+            </form>
         {% endif %}
-    </h2>
 
-    {% for task in tasks %}
-        <p>{{ task.task }}</p>
-    {% endfor %}
+        <button
+            type="button"
+            onclick="document.getElementById('edit-{{ task.task_id }}').hidden = false"
+        >
+            Edit
+        </button>
 
-</body>
-</html>
+        <form
+            id="edit-{{ task.task_id }}"
+            method="POST"
+            action="{{ url_for('edit_task', task_id=task.task_id) }}"
+            hidden
+        >
+            <input
+                type="text"
+                name="task"
+                value="{{ task.task }}"
+                required
+            >
+
+            <button type="submit">Save</button>
+
+            <button
+                type="button"
+                onclick="document.getElementById('edit-{{ task.task_id }}').hidden = true"
+            >
+                Cancel
+            </button>
+        </form>
+
+    </div>
+    <hr>
+
+{% else %}
+    <p>No tasks found.</p>
+{% endfor %}
+
 {% endblock %}

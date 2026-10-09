@@ -88,6 +88,33 @@ def dashboard():
 
 
 
+@app.route("/complete/<int:task_id>", methods=["POST"])
+@login_required
+def complete_task(task_id):
+    task = Task.query.filter_by(
+        task_id=task_id,
+        user_id=current_user.id
+    ).first_or_404()
+
+    task.status = True
+    db.session.commit()
+
+    return redirect(url_for("dashboard"))
+
+@app.route("/edit/<int:task_id>", methods=["POST"])
+@login_required
+def edit_task(task_id):
+    task = Task.query.filter_by(
+        task_id=task_id,
+        user_id=current_user.id
+    ).first_or_404()
+
+    task.task = request.form["task"]
+    db.session.commit()
+
+    return redirect(url_for("dashboard"))
+
+
 @app.route ("/tasks", methods=["GET","POST"])
 @login_required
 def task():
